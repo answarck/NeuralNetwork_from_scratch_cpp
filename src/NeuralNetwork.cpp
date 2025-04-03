@@ -19,6 +19,23 @@ NeuralNetwork::NeuralNetwork(vector<int> topology) {
 
 }
 
+void NeuralNetwork::feedForward() {
+	for (int i = 0; i < (this->layers.size() - 1); i++) {
+		Matrix *a = this->getNeuronMatrix(i);
+
+		if (i != 0) {
+			a = this->getActivatedNeuronMatrix(i);
+		}	
+
+		Matrix *b = this->getWeightMatrix(i);
+		Matrix *c = *a * *b;
+
+		for (int k = 0; k < c->getNumCols(); k++) {
+			this->setNeuronValue(i + 1, k, c->getVal(0, k));
+		}
+	} 
+}
+
 void NeuralNetwork::setCurrentInput(vector<double> input) {
 	this->input = input;
 	for (int i = 0; i < input.size(); i++) {

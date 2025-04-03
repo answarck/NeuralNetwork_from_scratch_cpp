@@ -1,6 +1,8 @@
 #include <iostream>
 #include <random>
 #include <vector>
+#include <cassert>
+
 #include "../include/Matrix.hpp"
 
 Matrix::Matrix(int numRows, int numCols, bool isRandom) {
@@ -48,3 +50,34 @@ Matrix *Matrix::transpose() {
 	return m;
 }
 
+Matrix *Matrix::operator*(Matrix& b) {
+    if (this->getNumCols() != b.getNumRows()) {
+        std::cerr << "A_cols: " << this->getNumCols() << " B_rows: " << b.getNumRows() << std::endl;
+        assert(false);
+    }
+
+    Matrix *c = new Matrix(this->getNumRows(), b.getNumCols(), false);
+
+    for (int i = 0; i < this->getNumRows(); i++) {
+        for (int k = 0; k < b.getNumCols(); k++) {
+            for (int l = 0; l < this->getNumCols(); l++) { 
+                double v = this->getVal(i, l) * b.getVal(l, k);
+                double nv = c->getVal(i, k) + v;
+                c->setVal(i, k, nv);
+            }
+        }
+    }
+
+    return c;
+}
+
+vector<double> Matrix::toVector() {
+	vector<double> v;
+	for (int i = 0; i < this->values.size(); i++) {
+		for (int k = 0; k < this->values.at(i).size(); k++) {
+			v.push_back(values.at(i).at(k));
+		}
+	}
+
+	return v;
+}

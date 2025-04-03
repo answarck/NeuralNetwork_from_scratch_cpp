@@ -15,8 +15,12 @@ public:
 	void printToConsole();
 	void setVal(int row, int col, double val) { this->values.at(row).at(col) = val; }
 	double getVal(int row, int col) { return this->values.at(row).at(col); }
+	vector<double> toVector();
 	int getNumRows() { return this->numRows; }
 	int getNumCols() { return this->numCols; }
+
+	// Overloading * for matrix multiplication
+	Matrix *operator * (Matrix& b);
 private:
 	int numRows;
 	int numCols;
