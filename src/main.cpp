@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
 	NeuralNetwork *nn = new NeuralNetwork(topology);
 	nn->setCurrentInput(input);
 	nn->feedForward();
+	nn->printToConsole();
 
 	return 0;
 }

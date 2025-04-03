@@ -9,7 +9,7 @@ Layer::Layer(int size) {
 	this->size = size;
 }
 
-void Layer::setVal(int index, double value) {
+void Layer::setNeuronVal(int index, double value) {
 	this->neurons.at(index)->setVal(value);
 }
 

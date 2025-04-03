@@ -39,12 +39,13 @@ void NeuralNetwork::feedForward() {
 void NeuralNetwork::setCurrentInput(vector<double> input) {
 	this->input = input;
 	for (int i = 0; i < input.size(); i++) {
-		this->layers.at(0)->setVal(i, input.at(i));
+		this->layers.at(0)->setNeuronVal(i, input.at(i));
 	}
 }
 
 void NeuralNetwork::printToConsole() {
 	for (int i = 0; i < this->layers.size(); i++) {
+		cout << "=====================" << endl;
 		cout << "LAYER: " << i << endl;
 		if (i == 0) {
 			Matrix *m = this->layers.at(i)->matrixifyVals();
@@ -54,7 +55,10 @@ void NeuralNetwork::printToConsole() {
 			Matrix *m = this->layers.at(i)->matrixifyActivatedVals();
 			m->printToConsole();
 		}
-
-
+		if (i != this->layers.size() - 1) {
+			cout << "Weight: " << endl;
+			this->getWeightMatrix(i)->printToConsole();
+		}
+		cout << "=====================" << endl;
 	}
 }

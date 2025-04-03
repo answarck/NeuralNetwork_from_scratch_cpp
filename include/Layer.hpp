@@ -10,7 +10,8 @@ using namespace std;
 class Layer {
 public:	
 	Layer(int size); 
-	void setVal(int index, double value); 
+	void setNeuronVal(int index, double value); 
+	double getNeuronVal(int index) { return this->neurons.at(index)->getVal(); }
 	Matrix *matrixifyVals();
 	Matrix *matrixifyActivatedVals();
 	Matrix *matrixifyDerivedVals();
