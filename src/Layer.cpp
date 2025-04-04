@@ -13,6 +13,15 @@ void Layer::setNeuronVal(int index, double value) {
 	this->neurons.at(index)->setVal(value);
 }
 
+vector<Neuron *> Layer::getNeurons() {
+	vector<Neuron *> temp;
+	for (int i = 0; i < this->neurons.size(); i++) {
+		temp.push_back(this->neurons.at(i));
+	}
+
+	return temp;
+}
+
 Matrix *Layer::matrixifyVals() {
 	Matrix *m = new Matrix(1, this->neurons.size(), false);
 	for (int i = 0; i < this->neurons.size(); i++) {

@@ -1,4 +1,5 @@
 #include <vector>
+#include <cassert>
 #include "../include/NeuralNetwork.hpp"
 #include "../include/Layer.hpp"
 #include "../include/Matrix.hpp"
@@ -34,6 +35,30 @@ void NeuralNetwork::feedForward() {
 			this->setNeuronValue(i + 1, k, c->getVal(0, k));
 		}
 	} 
+}
+
+void NeuralNetwork::setErrors() {
+	int outputLayerIndex = this->layers.size() - 1;
+	if (this->target.size() == 0) {
+		cerr << "Target is not set for Neural Network!." << endl;
+		assert(false);
+	}
+
+	if (this->target.size() != this->layers.at(outputLayerIndex)->getNeurons().size()) {
+		cerr << "Target is not same size that of the output layer size: " << endl;
+		assert(false);
+	}
+
+	this->error = 0.0;
+	vector<Neuron *> outputNeurons= this->layers.at(outputLayerIndex)->getNeurons();
+	for (int i = 0; i < target.size(); i++) {
+		double tempErr = (outputNeurons.at(i)->getActivatedVal() - this->target.at(i));
+		this->errors.push_back(tempErr);
+		this->error += tempErr;
+	}
+
+	this->historicalErrors.push_back(this->error);
+
 }
 
 void NeuralNetwork::setCurrentInput(vector<double> input) {

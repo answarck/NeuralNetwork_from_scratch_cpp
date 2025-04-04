@@ -12,6 +12,7 @@ public:
 	Layer(int size); 
 	void setNeuronVal(int index, double value); 
 	double getNeuronVal(int index) { return this->neurons.at(index)->getVal(); }
+	vector<Neuron *> getNeurons();
 	Matrix *matrixifyVals();
 	Matrix *matrixifyActivatedVals();
 	Matrix *matrixifyDerivedVals();
