@@ -26,5 +26,7 @@ int main(int argc, char** argv) {
 
 	cout << "Total Error: " << nn->getError() << endl;
 
+	nn->backPropogate();
+
 	return 0;
 }

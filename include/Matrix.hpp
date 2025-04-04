@@ -19,8 +19,10 @@ public:
 	int getNumRows() { return this->numRows; }
 	int getNumCols() { return this->numCols; }
 
-	// Overloading * for matrix multiplication
+	// Operator overloading
 	Matrix *operator * (Matrix& b);
+	Matrix *operator + (Matrix& b);
+	Matrix *operator - (Matrix& b);
 private:
 	int numRows;
 	int numCols;

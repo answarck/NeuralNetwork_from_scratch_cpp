@@ -37,6 +37,36 @@ void NeuralNetwork::feedForward() {
 	} 
 }
 
+void NeuralNetwork::backPropogate() {
+	vector<Matrix *> newWeights;
+	// output -> hidden
+	int outputLayerIndex      = this->layers.size() - 1;
+	Matrix *derivedValuesYToZ = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
+	Matrix *gradientYToZ      = new Matrix(1, derivedValuesYToZ->getNumCols(), false);
+	for (int i = 0; i < this->errors.size(); i++) {
+		double v = derivedValuesYToZ->getVal(0, i);
+		double e = this->errors.at(i);
+		double g = v * e;
+		gradientYToZ->setVal(0, i, g);
+	}
+
+	int lastHiddenLayerIndex    = outputLayerIndex - 1;
+	Layer *lastHiddenLayer      = this->layers.at(lastHiddenLayerIndex);
+	Matrix *weightsOutputHidden = this->weightMatrices.at(lastHiddenLayerIndex);
+	Matrix *deltaOutputHidden   = (*gradientYToZ->transpose() * 
+				       *lastHiddenLayer->matrixifyActivatedVals())->transpose();
+	Matrix *newWeightsOutputToHidden = *weightsOutputHidden - *deltaOutputHidden;
+
+	newWeights.push_back(newWeightsOutputToHidden);
+
+	cout << "Output to Hidden: " << endl;
+	newWeightsOutputToHidden->printToConsole();
+	// moving from output to input (excluding the output)
+	for (int i = lastHiddenLayerIndex; i >= 0; i--) {
+		
+	} 
+}
+
 void NeuralNetwork::setErrors() {
 	int outputLayerIndex = this->layers.size() - 1;
 	if (this->target.size() == 0) {

@@ -12,6 +12,7 @@ public:
 	NeuralNetwork(vector<int> topology);
 	void printToConsole();
 	void feedForward();
+	void backPropogate();
 	void setErrors();
 
 	Matrix *getNeuronMatrix(int index) { return this->layers.at(index)->matrixifyVals(); }
@@ -19,7 +20,9 @@ public:
 	Matrix *getDerivedNeuronMatrix(int index) { return this->layers.at(index)->matrixifyDerivedVals(); }
 	Matrix *getWeightMatrix(int index) { return this->weightMatrices.at(index); }
 
-	void setNeuronValue(int indexLayer, int indexNeuron, double value) { this->layers.at(indexLayer)->setNeuronVal(indexNeuron, value); }
+	void setNeuronValue(int indexLayer, int indexNeuron, double value) { 
+		this->layers.at(indexLayer)->setNeuronVal(indexNeuron, value); 
+	}
 	void setCurrentInput(vector<double> input);
 	void setCurrentTarget(vector<double> input) { this->target = input; }
 
@@ -30,6 +33,7 @@ private:
 	vector<int> 	 topology;
 	vector<Layer *>  layers;
 	vector<Matrix *> weightMatrices;
+	vector<Matrix *> gradientMatrices;
 	vector<double> input;
 	vector<double> target;
 	double error;

@@ -50,6 +50,46 @@ Matrix *Matrix::transpose() {
 	return m;
 }
 
+Matrix *Matrix::operator+(Matrix& b) {
+	if (this->getNumRows() != b.getNumRows() || this->getNumCols() != b.getNumCols()) {
+		std::cerr << "Rows and Column sizes mismatch: " << std::endl;
+		assert(false);
+	}
+
+	Matrix *m = new Matrix(this->getNumRows(), this->getNumCols(), false);
+
+	for (int i = 0; i < this->getNumRows(); i++) {
+		for (int k = 0; k < this->getNumCols(); k++) {
+			m->setVal(i,
+				  k, 
+				  this->getVal(i, k) + b.getVal(i , k));
+		}
+	
+	}
+
+	return m;
+}
+
+Matrix *Matrix::operator-(Matrix& b) {
+	if (this->getNumRows() != b.getNumRows() || this->getNumCols() != b.getNumCols()) {
+		std::cerr << "Rows and Column sizes mismatch: " << std::endl;
+		assert(false);
+	}
+
+	Matrix *m = new Matrix(this->getNumRows(), this->getNumCols(), false);
+
+	for (int i = 0; i < this->getNumRows(); i++) {
+		for (int k = 0; k < this->getNumCols(); k++) {
+			m->setVal(i,
+				  k, 
+				  this->getVal(i, k) - b.getVal(i , k));
+		}
+	
+	}
+
+	return m;
+}
+
 Matrix *Matrix::operator*(Matrix& b) {
     if (this->getNumCols() != b.getNumRows()) {
         std::cerr << "A_cols: " << this->getNumCols() << " B_rows: " << b.getNumRows() << std::endl;
