@@ -25,9 +25,10 @@ public:
 	}
 	void setCurrentInput(vector<double> input);
 	void setCurrentTarget(vector<double> input) { this->target = input; }
+	void setWeightMatrix(int index, Matrix *weightMatrix) { this->weightMatrices.at(index) = weightMatrix; }
 
 	vector<double> getErrors() { return this->errors; }
-	double getError() { return this->error; }
+	double getError() { return this->errors.at(this->errors.size() - 1); }
 private:
 	int 		 topologySize;
 	vector<int> 	 topology;
