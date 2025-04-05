@@ -111,6 +111,23 @@ Matrix *Matrix::operator*(Matrix& b) {
     return c;
 }
 
+Matrix *Matrix::elementwiseMultiply(Matrix *m) {
+	if (m->getNumRows() != this->getNumRows() || m->getNumCols() != this->getNumCols()) {
+		cerr << "Dimensions mismatch for the matrix: " << endl;
+		assert(false);
+	}
+
+	Matrix *temp = new Matrix(m->getNumRows(), m->getNumCols(), false);
+
+	for (int i = 0; i < m->getNumRows(); i++) {
+		for (int k = 0; k < m->getNumCols(); k++) {
+			temp->setVal(i, k, this->getVal(i, k) * m->getVal(i, k));
+		}
+	}
+
+	return temp;
+}
+
 vector<double> Matrix::toVector() {
 	vector<double> v;
 	for (int i = 0; i < this->values.size(); i++) {

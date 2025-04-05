@@ -18,6 +18,7 @@ public:
 	vector<double> toVector();
 	int getNumRows() { return this->numRows; }
 	int getNumCols() { return this->numCols; }
+	Matrix *elementwiseMultiply(Matrix *m);
 
 	// Operator overloading
 	Matrix *operator * (Matrix& b);

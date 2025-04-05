@@ -1,5 +1,6 @@
 #include <vector>
 #include <cassert>
+#include <cmath>
 #include "../include/NeuralNetwork.hpp"
 #include "../include/Layer.hpp"
 #include "../include/Matrix.hpp"
@@ -14,7 +15,7 @@ NeuralNetwork::NeuralNetwork(vector<int> topology) {
 	}
 
 	for (int i = 0; i < topology.size() - 1; i++) {
-		Matrix *m = new Matrix(topology.at(i), topology.at(i + 1), true);
+		Matrix *m = new Matrix(topology.at(i + 1), topology.at(i), true);
 		this->weightMatrices.push_back(m);
 	}
 
@@ -29,42 +30,61 @@ void NeuralNetwork::feedForward() {
 		}	
 
 		Matrix *b = this->getWeightMatrix(i);
-		Matrix *c = *a * *b;
+
+		Matrix *c = *a * *b->transpose();
 
 		for (int k = 0; k < c->getNumCols(); k++) {
 			this->setNeuronValue(i + 1, k, c->getVal(0, k));
 		}
 	} 
+
+	this->setErrors();
 }
 
 void NeuralNetwork::backPropogate() {
-	vector<Matrix *> newWeights;
-	// output -> hidden
-	int outputLayerIndex      = this->layers.size() - 1;
-	Matrix *derivedValuesYToZ = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
-	Matrix *gradientYToZ      = new Matrix(1, derivedValuesYToZ->getNumCols(), false);
-	for (int i = 0; i < this->errors.size(); i++) {
-		double v = derivedValuesYToZ->getVal(0, i);
-		double e = this->errors.at(i);
-		double g = v * e;
-		gradientYToZ->setVal(0, i, g);
+	// Hidden -> Output
+	int outputLayerIndex = this->layers.size() - 1;
+	int lastHiddenLayerIndex = outputLayerIndex - 1;
+	Matrix *output = this->layers.at(outputLayerIndex)->matrixifyVals();
+
+	Matrix *target = new Matrix(1, output->getNumCols(), false);
+	for (int i = 0; i < output->getNumCols(); i++) {
+		target->setVal(0, i, this->target.at(i));
 	}
 
-	int lastHiddenLayerIndex    = outputLayerIndex - 1;
-	Layer *lastHiddenLayer      = this->layers.at(lastHiddenLayerIndex);
-	Matrix *weightsOutputHidden = this->weightMatrices.at(lastHiddenLayerIndex);
-	Matrix *deltaOutputHidden   = (*gradientYToZ->transpose() * 
-				       *lastHiddenLayer->matrixifyActivatedVals())->transpose();
-	Matrix *newWeightsOutputToHidden = *weightsOutputHidden - *deltaOutputHidden;
+	Matrix *derivedVal = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
+	Matrix *delta = *output - *target;
 
-	newWeights.push_back(newWeightsOutputToHidden);
+	Matrix *outputLayerDelta = delta->elementwiseMultiply(derivedVal)->transpose();
 
-	cout << "Output to Hidden: " << endl;
-	newWeightsOutputToHidden->printToConsole();
-	// moving from output to input (excluding the output)
-	for (int i = lastHiddenLayerIndex; i >= 0; i--) {
+	Matrix *activatedVals = this->layers.at(lastHiddenLayerIndex)->matrixifyActivatedVals();
+	Matrix *weights = this->getWeightMatrix(lastHiddenLayerIndex);
+	
+	// Gradients calculated (OUTPUT)
+	Matrix *gradient = *outputLayerDelta * *activatedVals;
+
+
+	// Updating Bias(WILL UPDATE) and Weights
+	Matrix *updatedWeights = *this->getWeightMatrix(lastHiddenLayerIndex) - *gradient;
+	this->setWeightMatrix(lastHiddenLayerIndex, updatedWeights);
+
+	// Input to hidden and hidden to hidden
+	for (int i = lastHiddenLayerIndex - 1; i >= 0; i--) {
+		weights = this->getWeightMatrix(i);
+		derivedVal = this->layers.at(i + 1)->matrixifyDerivedVals(); 
 		
-	} 
+		Matrix *vals;
+		if (i == 0) {
+			vals = this->layers.at(i)->matrixifyVals();
+		}
+		else {
+			vals = this->layers.at(i)->matrixifyActivatedVals();
+		}
+		
+		delta = ((*weights * *delta->transpose())->transpose())->elementwiseMultiply(derivedVal);
+		gradient = *delta->transpose() * *vals;
+		
+	}
 }
 
 void NeuralNetwork::setErrors() {
@@ -82,7 +102,7 @@ void NeuralNetwork::setErrors() {
 	this->error = 0.0;
 	vector<Neuron *> outputNeurons= this->layers.at(outputLayerIndex)->getNeurons();
 	for (int i = 0; i < target.size(); i++) {
-		double tempErr = (outputNeurons.at(i)->getActivatedVal() - this->target.at(i));
+		double tempErr = 0.5 * pow(outputNeurons.at(i)->getActivatedVal() - this->target.at(i), 2);
 		this->errors.push_back(tempErr);
 		this->error += tempErr;
 	}

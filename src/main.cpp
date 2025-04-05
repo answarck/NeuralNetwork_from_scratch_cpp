@@ -20,13 +20,15 @@ int main(int argc, char** argv) {
 	nn->setCurrentInput(input);
 	nn->setCurrentTarget(input);
 	nn->feedForward();
-	nn->setErrors();
-
-	nn->printToConsole();
-
-	cout << "Total Error: " << nn->getError() << endl;
 
 	nn->backPropogate();
+	cout << "Total Error: " << nn->getError() << endl;
+	nn->feedForward();
+	nn->backPropogate();
+	cout << "Total Error: " << nn->getError() << endl;
+	nn->feedForward();
+	nn->backPropogate();
+	cout << "Total Error: " << nn->getError() << endl;
 
 	return 0;
 }
