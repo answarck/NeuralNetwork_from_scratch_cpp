@@ -12,23 +12,24 @@ int main(int argc, char** argv) {
 	topology.push_back(3);
 
 	vector<double> input;
+	input.push_back(3.0);
 	input.push_back(1.0);
-	input.push_back(0.0);
-	input.push_back(1.0);
+	input.push_back(2.0);
 
 	NeuralNetwork *nn = new NeuralNetwork(topology);
 	nn->setCurrentInput(input);
 	nn->setCurrentTarget(input);
-	nn->feedForward();
 
-	nn->backPropogate();
-	cout << "Total Error: " << nn->getError() << endl;
-	nn->feedForward();
-	nn->backPropogate();
-	cout << "Total Error: " << nn->getError() << endl;
-	nn->feedForward();
-	nn->backPropogate();
-	cout << "Total Error: " << nn->getError() << endl;
+	for (int i = 0; i < 100; i++) {
+		cout << "__________________________" << endl;
+		cout << "EPOCH: " << i << endl;
+		nn->feedForward();
+		nn->backPropogate();
+		nn->printOutputToConsole();
+		nn->printTargetToConsole();
+		cout << "Total Error: " << nn->getError() << endl;
+		cout << "__________________________" << endl;
+	}
 
 	return 0;
 }

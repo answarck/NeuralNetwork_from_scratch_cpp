@@ -118,6 +118,26 @@ void NeuralNetwork::setCurrentInput(vector<double> input) {
 	}
 }
 
+void NeuralNetwork::printInputToConsole() {
+	cout << "==========" << endl;
+	cout << "INPUT: " << endl;
+	this->layers.at(0)->matrixifyVals()->printToConsole();
+}
+
+void NeuralNetwork::printOutputToConsole() {
+	cout << "==========" << endl;
+	cout << "OUTPUT: " << endl;
+	this->layers.at(this->layers.size() - 1)->matrixifyVals()->printToConsole();
+}
+
+void NeuralNetwork::printTargetToConsole() {
+	cout << "==========" << endl;
+	cout << "TARGET: " << endl;
+	for (int i = 0; i < this->target.size(); i++) {
+		cout << this->target.at(i) << "\t"; 
+	}
+	cout << endl;
+}
 void NeuralNetwork::printToConsole() {
 	for (int i = 0; i < this->layers.size(); i++) {
 		cout << "=====================" << endl;

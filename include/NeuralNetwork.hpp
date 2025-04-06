@@ -11,6 +11,9 @@ class NeuralNetwork {
 public:	
 	NeuralNetwork(vector<int> topology);
 	void printToConsole();
+	void printInputToConsole();
+	void printOutputToConsole();
+	void printTargetToConsole();
 	void feedForward();
 	void backPropogate();
 	void setErrors();
@@ -28,7 +31,7 @@ public:
 	void setWeightMatrix(int index, Matrix *weightMatrix) { this->weightMatrices.at(index) = weightMatrix; }
 
 	vector<double> getErrors() { return this->errors; }
-	double getError() { return this->errors.at(this->errors.size() - 1); }
+	double getError() { return this->error; }
 private:
 	int 		 topologySize;
 	vector<int> 	 topology;
