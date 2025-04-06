@@ -33,7 +33,7 @@ double Matrix::getRandNo() {
 void Matrix::printToConsole() {
 	for (int i = 0; i < numRows; i++) {
 		for (int k = 0; k < numCols; k++) {
-			cout << this->values.at(i).at(k) << "\t\t";
+			cout << this->values.at(i).at(k) << "\t";
 		}		
 		cout << endl;
 	}

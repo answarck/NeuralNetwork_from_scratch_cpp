@@ -29,13 +29,16 @@ void NeuralNetwork::feedForward() {
 			a = this->getActivatedNeuronMatrix(i);
 		}	
 
-		Matrix *b = this->getWeightMatrix(i);
+		Matrix *b = this->getWeightMatrix(i)->transpose();
 
-		Matrix *c = *a * *b->transpose();
+		Matrix *c = *a * *b;
 
 		for (int k = 0; k < c->getNumCols(); k++) {
 			this->setNeuronValue(i + 1, k, c->getVal(0, k));
 		}
+
+		delete b;
+		delete c;
 	} 
 
 	this->setErrors();
@@ -52,26 +55,36 @@ void NeuralNetwork::backPropogate() {
 		target->setVal(0, i, this->target.at(i));
 	}
 
-	Matrix *derivedVal = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
+	Matrix *derivedVals = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
 	Matrix *delta = *output - *target;
+	Matrix *deltaT = delta->transpose();
 
-	Matrix *outputLayerDelta = delta->elementwiseMultiply(derivedVal)->transpose();
+	Matrix *outputLayerDelta = delta->elementwiseMultiply(derivedVals);
+	Matrix *outputLayerDeltaT = outputLayerDelta->transpose();
 
 	Matrix *activatedVals = this->layers.at(lastHiddenLayerIndex)->matrixifyActivatedVals();
 	Matrix *weights = this->getWeightMatrix(lastHiddenLayerIndex);
 	
 	// Gradients calculated (OUTPUT)
-	Matrix *gradient = *outputLayerDelta * *activatedVals;
+	Matrix *gradient = *outputLayerDeltaT * *activatedVals;
 
 
 	// Updating Bias(WILL UPDATE) and Weights
 	Matrix *updatedWeights = *this->getWeightMatrix(lastHiddenLayerIndex) - *gradient;
 	this->setWeightMatrix(lastHiddenLayerIndex, updatedWeights);
 
+	// cleanup from HIDDEN->OUTPUT
+	delete outputLayerDelta;
+	delete outputLayerDeltaT;
+	delete derivedVals;
+	delete activatedVals;
+	delete target;
+	delete output;
+
 	// Input to hidden and hidden to hidden
 	for (int i = lastHiddenLayerIndex - 1; i >= 0; i--) {
 		weights = this->getWeightMatrix(i);
-		derivedVal = this->layers.at(i + 1)->matrixifyDerivedVals(); 
+		derivedVals = this->layers.at(i + 1)->matrixifyDerivedVals(); 
 		
 		Matrix *vals;
 		if (i == 0) {
@@ -81,10 +94,34 @@ void NeuralNetwork::backPropogate() {
 			vals = this->layers.at(i)->matrixifyActivatedVals();
 		}
 		
-		delta = ((*weights * *delta->transpose())->transpose())->elementwiseMultiply(derivedVal);
-		gradient = *delta->transpose() * *vals;
+		Matrix *dA  = *weights * *deltaT;
+		Matrix *dAT = dA->transpose();	
+
+		// DELTA MATRIX cleanup
+		delete delta;
+		delete deltaT;
+
+		delta = dAT->elementwiseMultiply(derivedVals);
+		deltaT = delta->transpose();
+
+		gradient = *deltaT * *vals;
+
+		updatedWeights = *weights - *gradient;
+
+		this->setWeightMatrix(i, updatedWeights);
+
+		// Input/Hidden -> Hidden Memory cleanup
+		// Dont't delete updatedWeights
+		delete dA;
+		delete dAT;
+		delete gradient;
+		delete derivedVals;
+		delete vals;
 		
 	}
+	
+	delete delta;
+	delete deltaT;
 }
 
 void NeuralNetwork::setErrors() {

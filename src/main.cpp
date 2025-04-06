@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	nn->setCurrentInput(input);
 	nn->setCurrentTarget(input);
 
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 30; i++) {
 		cout << "__________________________" << endl;
 		cout << "EPOCH: " << i << endl;
 		nn->feedForward();
