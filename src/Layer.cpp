@@ -9,6 +9,12 @@ Layer::Layer(int size) {
 	this->size = size;
 }
 
+void Layer::cleanup() {
+	for (int i = 0; i < this->neurons.size(); i++) {
+		delete this->neurons.at(i);
+	}
+}
+
 void Layer::setNeuronVal(int index, double value) {
 	this->neurons.at(index)->setVal(value);
 }

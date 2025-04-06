@@ -10,6 +10,7 @@ using namespace std;
 class NeuralNetwork {
 public:	
 	NeuralNetwork(vector<int> topology);
+	~NeuralNetwork();
 	void printToConsole();
 	void printInputToConsole();
 	void printOutputToConsole();
@@ -37,7 +38,6 @@ private:
 	vector<int> 	 topology;
 	vector<Layer *>  layers;
 	vector<Matrix *> weightMatrices;
-	vector<Matrix *> gradientMatrices;
 	vector<double> input;
 	vector<double> target;
 	double error;

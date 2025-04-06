@@ -31,5 +31,7 @@ int main(int argc, char** argv) {
 		cout << "__________________________" << endl;
 	}
 
+	delete nn;
+
 	return 0;
 }

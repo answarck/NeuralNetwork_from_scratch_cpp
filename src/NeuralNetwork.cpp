@@ -21,13 +21,26 @@ NeuralNetwork::NeuralNetwork(vector<int> topology) {
 
 }
 
+NeuralNetwork::~NeuralNetwork() {
+	for (int i = 0; i < this->layers.size(); i++) {
+		this->layers.at(i)->cleanup();
+		delete layers.at(i);
+	}
+	for (int i = 0; i < this->weightMatrices.size(); i++) {
+		delete this->weightMatrices.at(i);
+	}
+}
+
 void NeuralNetwork::feedForward() {
 	for (int i = 0; i < (this->layers.size() - 1); i++) {
-		Matrix *a = this->getNeuronMatrix(i);
+		Matrix *a;
 
 		if (i != 0) {
 			a = this->getActivatedNeuronMatrix(i);
 		}	
+		else {
+			a = this->getNeuronMatrix(i);
+		}
 
 		Matrix *b = this->getWeightMatrix(i)->transpose();
 
@@ -37,6 +50,7 @@ void NeuralNetwork::feedForward() {
 			this->setNeuronValue(i + 1, k, c->getVal(0, k));
 		}
 
+		delete a;
 		delete b;
 		delete c;
 	} 
@@ -78,6 +92,8 @@ void NeuralNetwork::backPropogate() {
 	delete outputLayerDeltaT;
 	delete derivedVals;
 	delete activatedVals;
+	delete gradient;
+	delete weights;
 	delete target;
 	delete output;
 
@@ -116,6 +132,7 @@ void NeuralNetwork::backPropogate() {
 		delete dAT;
 		delete gradient;
 		delete derivedVals;
+		delete weights;
 		delete vals;
 		
 	}
@@ -158,13 +175,17 @@ void NeuralNetwork::setCurrentInput(vector<double> input) {
 void NeuralNetwork::printInputToConsole() {
 	cout << "==========" << endl;
 	cout << "INPUT: " << endl;
-	this->layers.at(0)->matrixifyVals()->printToConsole();
+	Matrix *m = this->layers.at(0)->matrixifyVals();
+	m->printToConsole();
+	delete m;
 }
 
 void NeuralNetwork::printOutputToConsole() {
 	cout << "==========" << endl;
 	cout << "OUTPUT: " << endl;
-	this->layers.at(this->layers.size() - 1)->matrixifyVals()->printToConsole();
+	Matrix *m = this->layers.at(this->layers.size() - 1)->matrixifyVals();
+	m->printToConsole();
+	delete m;
 }
 
 void NeuralNetwork::printTargetToConsole() {
@@ -179,18 +200,23 @@ void NeuralNetwork::printToConsole() {
 	for (int i = 0; i < this->layers.size(); i++) {
 		cout << "=====================" << endl;
 		cout << "LAYER: " << i << endl;
+		Matrix *m;
 		if (i == 0) {
-			Matrix *m = this->layers.at(i)->matrixifyVals();
+			m = this->layers.at(i)->matrixifyVals();
 			m->printToConsole();
 		}
 		else {
-			Matrix *m = this->layers.at(i)->matrixifyActivatedVals();
+			m = this->layers.at(i)->matrixifyActivatedVals();
 			m->printToConsole();
 		}
 		if (i != this->layers.size() - 1) {
 			cout << "Weight: " << endl;
-			this->getWeightMatrix(i)->printToConsole();
+			Matrix *wM = this->getWeightMatrix(i);
+			wM->printToConsole();
+			delete wM;
 		}
 		cout << "=====================" << endl;
+
+		delete m;
 	}
 }
