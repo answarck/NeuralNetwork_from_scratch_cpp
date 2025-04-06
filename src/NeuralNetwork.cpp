@@ -12,12 +12,12 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, double learningRate) {
 
 	for (int i = 0; i < topology.size(); i++) {
 		Layer *l = new Layer(topology.at(i));
-		Matrix *b = new Matrix(1, topology.at(i), false);
+		Matrix *b = new Matrix(topology.at(i), 1, false);
 		this->biasMatrices.push_back(b);
 		this->layers.push_back(l);
 	}
 
-	for (int i = 0; i < topology.size() - 1; i++) {
+	for (int i = 0; i < this->topologySize - 1; i++) {
 		Matrix *m = new Matrix(topology.at(i + 1), topology.at(i), true);
 		this->weightMatrices.push_back(m);
 	}
@@ -46,16 +46,19 @@ void NeuralNetwork::feedForward() {
 			a = this->getNeuronMatrix(i);
 		}
 
-		Matrix *b = this->getWeightMatrix(i)->transpose();
+		Matrix *b = this->getWeightMatrix(i);
+		Matrix *d = this->getBiasMatrix(i + 1);
 
-		Matrix *c = *a * *b;
 
-		for (int k = 0; k < c->getNumCols(); k++) {
-			this->setNeuronValue(i + 1, k, c->getVal(0, k));
+		Matrix *e = *b * *a;
+		Matrix *c = *e + *d;
+
+		for (int k = 0; k < c->getNumRows(); k++) {
+			this->setNeuronValue(i + 1, k, c->getVal(k, 0));
 		}
 
 		delete a;
-		delete b;
+		delete e;
 		delete c;
 	} 
 
@@ -68,39 +71,37 @@ void NeuralNetwork::backPropogate() {
 	int lastHiddenLayerIndex = outputLayerIndex - 1;
 	Matrix *output = this->layers.at(outputLayerIndex)->matrixifyVals();
 
-	Matrix *target = new Matrix(1, output->getNumCols(), false);
-	for (int i = 0; i < output->getNumCols(); i++) {
-		target->setVal(0, i, this->target.at(i));
+	Matrix *target = new Matrix(output->getNumRows(), 1, false);
+	for (int i = 0; i < output->getNumRows(); i++) {
+		target->setVal(i, 0, this->target.at(i));
 	}
 
 	Matrix *derivedVals = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
 	Matrix *delta = *output - *target;
-	Matrix *deltaT = delta->transpose();
 
 	Matrix *outputLayerDelta = delta->elementwiseMultiply(derivedVals);
-	Matrix *outputLayerDeltaT = outputLayerDelta->transpose();
 
 	Matrix *activatedVals = this->layers.at(lastHiddenLayerIndex)->matrixifyActivatedVals();
-	Matrix *weights = this->getWeightMatrix(lastHiddenLayerIndex);
+	Matrix *activatedValsT = activatedVals->transpose();
+	Matrix *weights = this->weightMatrices.at(lastHiddenLayerIndex);
 	Matrix *biases = this->getBiasMatrix(outputLayerIndex);
 	
 	// Gradients calculated (OUTPUT)
-	Matrix *gradient = *outputLayerDeltaT * *activatedVals;
-
+	Matrix *gradient = *outputLayerDelta * *activatedValsT;
 
 	// Updating Bias and Weights
 	gradient->scalarMultiply(this->learningRate);
 	delta->scalarMultiply(this->learningRate);
-	Matrix *updatedWeights = *this->getWeightMatrix(lastHiddenLayerIndex) - *gradient;
+	Matrix *updatedWeights = *weights - *gradient;
 	Matrix *updatedBiases = *this->getBiasMatrix(outputLayerIndex) - *delta;
 	this->setWeightMatrix(lastHiddenLayerIndex, updatedWeights);
 	this->setBiasMatrix(outputLayerIndex, updatedBiases);
 
 	// cleanup from HIDDEN->OUTPUT
 	delete outputLayerDelta;
-	delete outputLayerDeltaT;
 	delete derivedVals;
 	delete activatedVals;
+	delete activatedValsT;
 	delete gradient;
 	delete target;
 	delete output;
@@ -119,17 +120,15 @@ void NeuralNetwork::backPropogate() {
 			vals = this->layers.at(i)->matrixifyActivatedVals();
 		}
 		
-		Matrix *dA  = *weights * *deltaT;
-		Matrix *dAT = dA->transpose();	
+		Matrix *valsT = vals->transpose();	
+		Matrix *dA  = *weights * *delta;
 
 		// DELTA MATRIX cleanup
 		delete delta;
-		delete deltaT;
 
-		delta = dAT->elementwiseMultiply(derivedVals);
-		deltaT = delta->transpose();
+		delta = dA->elementwiseMultiply(derivedVals);
 
-		gradient = *deltaT * *vals;
+		gradient = *delta * *valsT;
 		gradient->scalarMultiply(this->learningRate);
 		delta->scalarMultiply(this->learningRate);
 		updatedWeights = *weights - *gradient;
@@ -141,15 +140,14 @@ void NeuralNetwork::backPropogate() {
 		// Input/Hidden -> Hidden Memory cleanup
 		// Dont't delete updatedWeights
 		delete dA;
-		delete dAT;
 		delete gradient;
 		delete derivedVals;
 		delete vals;
+		delete valsT;
 		
 	}
 	
 	delete delta;
-	delete deltaT;
 }
 
 void NeuralNetwork::setErrors() {

@@ -29,27 +29,27 @@ vector<Neuron *> Layer::getNeurons() {
 }
 
 Matrix *Layer::matrixifyVals() {
-	Matrix *m = new Matrix(1, this->neurons.size(), false);
+	Matrix *m = new Matrix(this->neurons.size(), 1, false);
 	for (int i = 0; i < this->neurons.size(); i++) {
-		m->setVal(0, i, neurons.at(i)->getVal());
+		m->setVal(i, 0, neurons.at(i)->getVal());
 	}
 	
 	return m;
 }
 
 Matrix *Layer::matrixifyActivatedVals() {
-	Matrix *m = new Matrix(1, this->neurons.size(), false);
+	Matrix *m = new Matrix(this->neurons.size(), 1, false);
 	for (int i = 0; i < this->neurons.size(); i++) {
-		m->setVal(0, i, neurons.at(i)->getActivatedVal());
+		m->setVal(i, 0, neurons.at(i)->getActivatedVal());
 	}
 	
 	return m;
 }
 
 Matrix *Layer::matrixifyDerivedVals() {
-	Matrix *m = new Matrix(1, this->neurons.size(), false);
+	Matrix *m = new Matrix(this->neurons.size(), 1, false);
 	for (int i = 0; i < this->neurons.size(); i++) {
-		m->setVal(0, i, neurons.at(i)->getDerivedVal());
+		m->setVal(i, 0, neurons.at(i)->getDerivedVal());
 	}
 	
 	return m;
