@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	input.push_back(1.0);
 	input.push_back(2.0);
 
-	NeuralNetwork *nn = new NeuralNetwork(topology);
+	NeuralNetwork *nn = new NeuralNetwork(topology, 0.01);
 	nn->setCurrentInput(input);
 	nn->setCurrentTarget(input);
 

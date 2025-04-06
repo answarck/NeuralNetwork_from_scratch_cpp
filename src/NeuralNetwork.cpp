@@ -5,9 +5,10 @@
 #include "../include/Layer.hpp"
 #include "../include/Matrix.hpp"
 
-NeuralNetwork::NeuralNetwork(vector<int> topology) {
+NeuralNetwork::NeuralNetwork(vector<int> topology, double learningRate) {
 	this->topologySize = topology.size();
 	this->topology = topology;
+	this->learningRate = learningRate;
 
 	for (int i = 0; i < topology.size(); i++) {
 		Layer *l = new Layer(topology.at(i));
@@ -88,6 +89,8 @@ void NeuralNetwork::backPropogate() {
 
 
 	// Updating Bias and Weights
+	gradient->scalarMultiply(this->learningRate);
+	delta->scalarMultiply(this->learningRate);
 	Matrix *updatedWeights = *this->getWeightMatrix(lastHiddenLayerIndex) - *gradient;
 	Matrix *updatedBiases = *this->getBiasMatrix(outputLayerIndex) - *delta;
 	this->setWeightMatrix(lastHiddenLayerIndex, updatedWeights);
@@ -127,7 +130,8 @@ void NeuralNetwork::backPropogate() {
 		deltaT = delta->transpose();
 
 		gradient = *deltaT * *vals;
-
+		gradient->scalarMultiply(this->learningRate);
+		delta->scalarMultiply(this->learningRate);
 		updatedWeights = *weights - *gradient;
 		updatedBiases = *biases - *delta;
 

@@ -9,7 +9,7 @@ using namespace std;
 
 class NeuralNetwork {
 public:	
-	NeuralNetwork(vector<int> topology);
+	NeuralNetwork(vector<int> topology, double learningRate);
 	~NeuralNetwork();
 	void printToConsole();
 	void printInputToConsole();
@@ -43,9 +43,10 @@ private:
 	vector<Matrix *> biasMatrices;
 	vector<double> input;
 	vector<double> target;
-	double error;
 	vector<double> errors;
 	vector<double> historicalErrors;
+	double error;
+	double learningRate;
 
 
 };

@@ -50,6 +50,14 @@ Matrix *Matrix::transpose() {
 	return m;
 }
 
+void Matrix::scalarMultiply(double scalar) {
+	for (int i = 0; i < this->getNumRows(); i++) {
+		for (int k = 0; k < this->getNumCols(); k++) {
+			this->setVal(i, k, this->getVal(i, k) * scalar);
+		}
+	}
+}
+
 Matrix *Matrix::operator+(Matrix& b) {
 	if (this->getNumRows() != b.getNumRows() || this->getNumCols() != b.getNumCols()) {
 		std::cerr << "Rows and Column sizes mismatch: " << std::endl;
