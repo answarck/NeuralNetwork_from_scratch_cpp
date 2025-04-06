@@ -23,13 +23,15 @@ public:
 	Matrix *getActivatedNeuronMatrix(int index) { return this->layers.at(index)->matrixifyActivatedVals(); }
 	Matrix *getDerivedNeuronMatrix(int index) { return this->layers.at(index)->matrixifyDerivedVals(); }
 	Matrix *getWeightMatrix(int index) { return this->weightMatrices.at(index); }
+	Matrix *getBiasMatrix(int index) { return this->biasMatrices.at(index) ;}
 
 	void setNeuronValue(int indexLayer, int indexNeuron, double value) { 
 		this->layers.at(indexLayer)->setNeuronVal(indexNeuron, value); 
 	}
 	void setCurrentInput(vector<double> input);
 	void setCurrentTarget(vector<double> input) { this->target = input; }
-	void setWeightMatrix(int index, Matrix *weightMatrix) { this->weightMatrices.at(index) = weightMatrix; }
+	void setWeightMatrix(int index, Matrix *weightMatrix);
+	void setBiasMatrix(int index, Matrix *biasMatrix);
 
 	vector<double> getErrors() { return this->errors; }
 	double getError() { return this->error; }
@@ -38,6 +40,7 @@ private:
 	vector<int> 	 topology;
 	vector<Layer *>  layers;
 	vector<Matrix *> weightMatrices;
+	vector<Matrix *> biasMatrices;
 	vector<double> input;
 	vector<double> target;
 	double error;
