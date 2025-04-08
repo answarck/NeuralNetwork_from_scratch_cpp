@@ -1,6 +1,9 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include "../include/NeuralNetwork.hpp"
 #include "../include/Layer.hpp"
 #include "../include/Matrix.hpp"
@@ -24,6 +27,68 @@ NeuralNetwork::NeuralNetwork(vector<int> topology, double learningRate) {
 
 }
 
+NeuralNetwork::NeuralNetwork(const std::string& path) {
+	std::ifstream model(path);
+	std::string chunk;
+	std::string temp;
+
+	if (model.is_open()) {
+		// Setting up topology 
+		vector<int> topology;
+	
+		std::getline(model, chunk, ';');
+		std::stringstream topologyChunk(chunk);
+
+		while(std::getline(topologyChunk, temp, ',')) {
+			topology.push_back(std::stoi(temp));
+		}
+	
+		this->topology = topology;
+		this->topologySize = this->topology.size();
+		
+		// setting up weights
+		for (int i = 0; i < this->topologySize - 1; i++) {
+			std::getline(model, chunk, ';');
+			std::stringstream weightsChunk(chunk);
+			Matrix *m = new Matrix(topology.at(i + 1), topology.at(i), false);
+			for (int k = 0; k < m->getNumRows(); k++) {
+				for (int l = 0; l < m->getNumCols(); l++) {
+					std::getline(weightsChunk, temp, ',');
+					m->setVal(k, l, std::stod(temp));
+				}
+			}
+			this->weightMatrices.push_back(m);
+		}
+
+		// Setting up biases
+		for (int i = 0; i < this->topologySize; i++) {
+			std::getline(model, chunk, ';');
+			std::stringstream biasesChunk(chunk);
+			Matrix *m = new Matrix(topology.at(i), 1, false);
+			for (int k = 0; k < m->getNumRows(); k++) {
+				for (int l = 0; l < m->getNumCols(); l++) {
+					std::getline(biasesChunk, temp, ',');
+					m->setVal(k, l, std::stod(temp));
+				}
+			}
+			this->biasMatrices.push_back(m);
+
+		
+		}
+
+		// setting up learning rate (eventho not needed)
+		std::getline(model, chunk, ';');
+		this->learningRate = std::stod(chunk);
+
+		// Creating Layers
+		for (int i = 0; i < this->topologySize; i++) {
+			Layer *l = new Layer(this->topology.at(i));
+			this->layers.push_back(l);
+		}
+	}
+	model.close();
+}
+
 NeuralNetwork::~NeuralNetwork() {
 	for (int i = 0; i < this->layers.size(); i++) {
 		this->layers.at(i)->cleanup();
@@ -33,6 +98,62 @@ NeuralNetwork::~NeuralNetwork() {
 	for (int i = 0; i < this->weightMatrices.size(); i++) {
 		delete this->weightMatrices.at(i);
 	}
+}
+
+void NeuralNetwork::saveModel(const std::string& path) {
+	std::ofstream file(path);	
+
+	if (file.is_open()) {
+		for ( int i = 0; i < this->topologySize; i++) {
+			file << this->topology.at(i);
+			if (i != this->topologySize - 1) {
+				file << ",";
+			}
+			else {
+				file << ";";
+			}
+			
+		}
+		for (int i = 0; i < this->topologySize - 1; i++) {
+			Matrix *wM = this->getWeightMatrix(i);
+
+			for (int k = 0; k < wM->getNumRows(); k++) {
+				for (int l = 0; l < wM->getNumCols(); l++) {
+					file << wM->getVal(k, l);
+					if (k == wM->getNumRows() - 1 && l == wM->getNumCols() - 1) {
+						file << ";";
+					}
+					else {
+						file << ",";
+					}
+				}
+			}
+		}
+		for (int i = 0; i < this->topologySize; i++) {
+			Matrix *wB = this->getBiasMatrix(i);
+
+			for (int k = 0; k < wB->getNumRows(); k++) {
+				for (int l = 0; l < wB->getNumCols(); l++) {
+					file << wB->getVal(k, l);
+					if (k == wB->getNumRows() - 1 && l == wB->getNumCols() - 1) {
+						file << ";";
+					}
+					else {
+						file << ",";
+					}
+				}
+			}
+		}
+		file << this->learningRate << ";";
+	}
+	file.close();
+}
+
+Matrix *NeuralNetwork::predict(vector<double> input) {
+	this->setCurrentInput(input);
+	this->feedForward();
+
+	return this->layers.at(this->layers.size() - 1)->matrixifyVals();
 }
 
 void NeuralNetwork::feedForward() {
@@ -61,11 +182,11 @@ void NeuralNetwork::feedForward() {
 		delete e;
 		delete c;
 	} 
-
-	this->setErrors();
 }
 
 void NeuralNetwork::backPropogate() {
+	this->setErrors();
+
 	// Hidden -> Output
 	int outputLayerIndex = this->layers.size() - 1;
 	int lastHiddenLayerIndex = outputLayerIndex - 1;

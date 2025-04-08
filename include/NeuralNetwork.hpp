@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 #include "Matrix.hpp"
 #include "Layer.hpp"
 using namespace std;
@@ -10,6 +11,7 @@ using namespace std;
 class NeuralNetwork {
 public:	
 	NeuralNetwork(vector<int> topology, double learningRate);
+	NeuralNetwork(const std::string& path);
 	~NeuralNetwork();
 	void printToConsole();
 	void printInputToConsole();
@@ -18,12 +20,15 @@ public:
 	void feedForward();
 	void backPropogate();
 	void setErrors();
+	void saveModel(const std::string& path);
 
 	Matrix *getNeuronMatrix(int index) { return this->layers.at(index)->matrixifyVals(); }
 	Matrix *getActivatedNeuronMatrix(int index) { return this->layers.at(index)->matrixifyActivatedVals(); }
 	Matrix *getDerivedNeuronMatrix(int index) { return this->layers.at(index)->matrixifyDerivedVals(); }
 	Matrix *getWeightMatrix(int index) { return this->weightMatrices.at(index); }
 	Matrix *getBiasMatrix(int index) { return this->biasMatrices.at(index) ;}
+
+	Matrix *predict(vector<double> input);
 
 	void setNeuronValue(int indexLayer, int indexNeuron, double value) { 
 		this->layers.at(indexLayer)->setNeuronVal(indexNeuron, value); 
