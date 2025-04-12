@@ -12,3 +12,6 @@ _deps
 CMakeUserPresets.json
 nn_from_scratch
 model.model
+*.swp
+data
+labels

@@ -198,63 +198,52 @@ void NeuralNetwork::backPropogate() {
 	}
 
 	Matrix *derivedVals = this->layers.at(outputLayerIndex)->matrixifyDerivedVals();
-	Matrix *delta = *output - *target;
+	Matrix *error = *output - *target;
 
-	Matrix *outputLayerDelta = delta->elementwiseMultiply(derivedVals);
+	Matrix *delta = error->elementwiseMultiply(derivedVals);
 
-	Matrix *activatedVals = this->layers.at(lastHiddenLayerIndex)->matrixifyActivatedVals();
-	Matrix *activatedValsT = activatedVals->transpose();
-	Matrix *weights = this->weightMatrices.at(lastHiddenLayerIndex);
-	Matrix *biases = this->getBiasMatrix(outputLayerIndex);
-	
-	// Gradients calculated (OUTPUT)
-	Matrix *gradient = *outputLayerDelta * *activatedValsT;
-
-	// Updating Bias and Weights
-	gradient->scalarMultiply(this->learningRate);
-	delta->scalarMultiply(this->learningRate);
-	Matrix *updatedWeights = *weights - *gradient;
-	Matrix *updatedBiases = *this->getBiasMatrix(outputLayerIndex) - *delta;
-	this->setWeightMatrix(lastHiddenLayerIndex, updatedWeights);
-	this->setBiasMatrix(outputLayerIndex, updatedBiases);
 
 	// cleanup from HIDDEN->OUTPUT
-	delete outputLayerDelta;
+	delete error;
 	delete derivedVals;
-	delete activatedVals;
-	delete activatedValsT;
-	delete gradient;
 	delete target;
 	delete output;
 
 	// Input to hidden and hidden to hidden
-	for (int i = lastHiddenLayerIndex - 1; i >= 0; i--) {
-		weights = this->getWeightMatrix(i);
-		biases = this->getBiasMatrix(i + 1);
-		derivedVals = this->layers.at(i + 1)->matrixifyDerivedVals(); 
-		
-		Matrix *vals;
-		if (i == 0) {
-			vals = this->layers.at(i)->matrixifyVals();
-		}
-		else {
-			vals = this->layers.at(i)->matrixifyActivatedVals();
-		}
-		
+	for (int i = lastHiddenLayerIndex; i >= 0; i--) {
+		Matrix *vals = i != 0 ? this->layers.at(i)->matrixifyActivatedVals() : 
+					this->layers.at(i)->matrixifyVals();
+		// Getting Weights and Biases
+		Matrix *weights = this->getWeightMatrix(i);
+		Matrix *biases = this->getBiasMatrix(i + 1);
+
+		// Gradient Calculation
 		Matrix *valsT = vals->transpose();	
-		Matrix *dA  = *weights * *delta;
+		Matrix *gradient = *delta * *valsT;
+	
+		// Bias updated first since the delta is updated in each
+		// iteration and we want the old delta to update the biases
 
-		// DELTA MATRIX cleanup
+		// Calculating new biases
+		// used deltaSC for not altering the original delta
+		Matrix deltaSC = *delta;
+		deltaSC.scalarMultiply(this->learningRate);
+		Matrix *updatedBiases = *biases - deltaSC;
+
+		// Calculating delta
+		Matrix *weightsT = weights->transpose();
+		derivedVals = this->layers.at(i)->matrixifyDerivedVals(); 
+		Matrix *dA = *weightsT * *delta;
 		delete delta;
+		delta = dA->elementwiseMultiply(derivedVals); // This is the real DELTA
 
-		delta = dA->elementwiseMultiply(derivedVals);
-
-		gradient = *delta * *valsT;
+		
+		// Calculating new weights
 		gradient->scalarMultiply(this->learningRate);
-		delta->scalarMultiply(this->learningRate);
-		updatedWeights = *weights - *gradient;
-		updatedBiases = *biases - *delta;
+		Matrix *updatedWeights = *weights - *gradient;
 
+
+		// Setting up weights and biases
 		this->setWeightMatrix(i, updatedWeights);
 		this->setBiasMatrix(i + 1, updatedBiases);
 
@@ -263,6 +252,7 @@ void NeuralNetwork::backPropogate() {
 		delete dA;
 		delete gradient;
 		delete derivedVals;
+		delete weightsT;
 		delete vals;
 		delete valsT;
 		

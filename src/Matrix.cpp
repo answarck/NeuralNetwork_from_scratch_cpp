@@ -100,7 +100,8 @@ Matrix *Matrix::operator-(Matrix& b) {
 
 Matrix *Matrix::operator*(Matrix& b) {
     if (this->getNumCols() != b.getNumRows()) {
-        std::cerr << "A_cols: " << this->getNumCols() << " B_rows: " << b.getNumRows() << std::endl;
+        std::cerr << "A: " << this->getNumRows() << "," << this->getNumCols() << std::endl;
+        std::cerr << "B: " << b.getNumRows() << "," << b.getNumCols() << std::endl;
         assert(false);
     }
 
