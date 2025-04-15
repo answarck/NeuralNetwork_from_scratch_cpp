@@ -10,6 +10,21 @@ This project implements a feedforward artificial neural network from scratch in 
 - Forward and backward propagation
 - Console output utilities for debugging
 
+## Getting Started
+
+### Prerequisites
+
+- C++ Compiler (g++ or clang)
+- CMake
+
+### Build Instructions
+
+```bash
+cmake .
+make
+./nn_from_scratch
+```
+
 ## Class: `NeuralNetwork`
 
 ### Constructor Overloads
@@ -102,3 +117,8 @@ int main() {
 
     return 0;
 }
+```
+
+## References 
+
+[devlogs-Playlist](https://www.youtube.com/watch?v=PQo78WNGiow&list=PL2-7U6BzddIYBOl98DDsmpXiTcj1ojgJG)
