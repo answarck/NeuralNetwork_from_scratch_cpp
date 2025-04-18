@@ -59,7 +59,7 @@ make
   Prints the output layer’s values to the console.
 
 - `void printTargetToConsole()`  
-  Prints the target values used in backpropagation.
+  Prints the target values.
 
 - `void printToConsole()`  
   Prints all layer values, weights, and biases of the entire network.
